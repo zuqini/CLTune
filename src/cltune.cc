@@ -42,7 +42,10 @@ Tuner::Tuner():
     pimpl(new TunerImpl()) {
 }
 Tuner::Tuner(size_t platform_id, size_t device_id):
-    pimpl(new TunerImpl(platform_id, device_id)) {
+    pimpl(new TunerImpl(platform_id, device_id, false)) {
+}
+Tuner::Tuner(size_t platform_id, size_t device_id, bool suppress_output):
+    pimpl(new TunerImpl(platform_id, device_id, suppress_output)) {
 }
 Tuner::~Tuner() {
 }

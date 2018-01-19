@@ -67,14 +67,14 @@ const std::string TunerImpl::kMessageBest    = "\x1b[35m[     BEST ]\x1b[0m";
 // =================================================================================================
 
 // Initializes with a custom platform and device
-TunerImpl::TunerImpl(const size_t platform_id, const size_t device_id):
+TunerImpl::TunerImpl(const size_t platform_id, const size_t device_id, const bool suppress_output):
     platform_(Platform(platform_id)),
     device_(Device(platform_, device_id)),
     context_(Context(device_)),
     queue_(Queue(context_, device_)),
     num_runs_(size_t{1}),
     has_reference_(false),
-    suppress_output_(false),
+    suppress_output_(suppress_output),
     output_search_process_(false),
     search_log_filename_(std::string{}),
     search_method_(SearchMethod::FullSearch),
@@ -330,7 +330,8 @@ TunerImpl::TunerResult TunerImpl::RunKernel(const std::string &source, const Ker
     queue_.Finish();
 
     // Multiple runs of the kernel to find the minimum execution time
-    fprintf(stdout, "%s Running %s\n", kMessageRun.c_str(), kernel.name().c_str());
+    if (!suppress_output_)
+      fprintf(stdout, "%s Running %s\n", kMessageRun.c_str(), kernel.name().c_str());
     auto events = std::vector<Event>(num_runs_);
     auto elapsed_time = std::numeric_limits<float>::max();
     for (auto t=size_t{0}; t<num_runs_; ++t) {
@@ -355,9 +356,10 @@ TunerImpl::TunerResult TunerImpl::RunKernel(const std::string &source, const Ker
     queue_.Finish();
 
     // Prints diagnostic information
-    fprintf(stdout, "%s Completed %s (%.1lf ms) - %zu out of %zu\n",
-            kMessageOK.c_str(), kernel.name().c_str(), elapsed_time,
-            configuration_id+1, num_configurations);
+    if (!suppress_output_)
+      fprintf(stdout, "%s Completed %s (%.1lf ms) - %zu out of %zu\n",
+              kMessageOK.c_str(), kernel.name().c_str(), elapsed_time,
+              configuration_id+1, num_configurations);
 
     // Computes the result of the tuning
     auto local_threads = size_t{1};

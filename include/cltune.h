@@ -73,6 +73,7 @@ class Tuner {
   // Initializes the tuner either with platform 0 and device 0 or with a custom platform/device
   explicit PUBLIC_API Tuner();
   explicit PUBLIC_API Tuner(size_t platform_id, size_t device_id);
+  explicit PUBLIC_API Tuner(size_t platform_id, size_t device_id, bool suppress_output);
   PUBLIC_API ~Tuner();
 
   // Adds a new kernel to the list of tuning-kernels and returns a unique ID (to be used when
