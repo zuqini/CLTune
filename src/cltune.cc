@@ -297,6 +297,13 @@ std::unordered_map<std::string, size_t> Tuner::GetBestResult() const {
   return parameters;
 }
 
+double Tuner::BestTime() const {
+  // Finds the best result
+  const auto best_result = pimpl->GetBestResult();
+  const auto best_time = best_result.time;
+  return best_time;
+}
+
 // Iterates over all tuning results and prints each parameter configuration and the corresponding
 // timing-results. Printing is to stdout.
 double Tuner::PrintToScreen() const {

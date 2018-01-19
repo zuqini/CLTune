@@ -162,6 +162,8 @@ class Tuner {
   // Changes the number of times each kernel should be run. Used for averaging execution times.
   void PUBLIC_API SetNumRuns(const size_t num_runs);
 
+  double PUBLIC_API BestTime() const;
+
  private:
 
   // This implements the pointer to implementation idiom (pimpl) and hides all private functions and
