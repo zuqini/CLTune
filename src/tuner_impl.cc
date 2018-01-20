@@ -10,13 +10,13 @@
 // -------------------------------------------------------------------------------------------------
 //
 // Copyright 2014 SURFsara
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //  http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,7 +63,7 @@ const std::string TunerImpl::kMessageWarning = "\x1b[33m[  WARNING ]\x1b[0m";
 const std::string TunerImpl::kMessageFailure = "\x1b[31m[   FAILED ]\x1b[0m";
 const std::string TunerImpl::kMessageResult  = "\x1b[32m[ RESULT   ]\x1b[0m";
 const std::string TunerImpl::kMessageBest    = "\x1b[35m[     BEST ]\x1b[0m";
-  
+
 // =================================================================================================
 
 // Initializes with a custom platform and device
@@ -131,7 +131,7 @@ void TunerImpl::Tune() {
     RunKernel(reference_kernel_->source(), *reference_kernel_, 0, 1);
     StoreReferenceOutput();
   }
-  
+
   // Iterates over all tunable kernels
   for (auto &kernel: kernels_) {
     PrintHeader("Testing kernel "+kernel.name());
@@ -334,6 +334,9 @@ TunerImpl::TunerResult TunerImpl::RunKernel(const std::string &source, const Ker
       fprintf(stdout, "%s Running %s\n", kMessageRun.c_str(), kernel.name().c_str());
     auto events = std::vector<Event>(num_runs_);
     auto elapsed_time = std::numeric_limits<float>::max();
+    auto elapsed_time_queue_submit = std::numeric_limits<float>::max();
+    auto elapsed_time_start_end = std::numeric_limits<float>::max();
+    auto elapsed_time_queue_start = std::numeric_limits<float>::max();
     for (auto t=size_t{0}; t<num_runs_; ++t) {
       #ifdef VERBOSE
         fprintf(stdout, "%s Launching kernel (%zu out of %zu for averaging)\n", kMessageVerbose.c_str(),
@@ -352,6 +355,9 @@ TunerImpl::TunerResult TunerImpl::RunKernel(const std::string &source, const Ker
         fprintf(stdout, "%s Completed kernel in %.2lf ms\n", kMessageVerbose.c_str(), cpu_timing);
       #endif
       elapsed_time = std::min(elapsed_time, cpu_timing);
+      elapsed_time_queue_submit = std::min(elapsed_time_queue_submit, events[t].GetQueueToSubmitTime());
+      elapsed_time_start_end = std::min(elapsed_time_start_end, events[t].GetStartToEndTime());
+      elapsed_time_queue_start = std::min(elapsed_time_queue_start, events[t].GetQueueToStartTime());
     }
     queue_.Finish();
 
@@ -364,7 +370,10 @@ TunerImpl::TunerResult TunerImpl::RunKernel(const std::string &source, const Ker
     // Computes the result of the tuning
     auto local_threads = size_t{1};
     for (auto &item: local) { local_threads *= item; }
-    TunerResult result = {kernel.name(), elapsed_time, local_threads, false, {}};
+    TunerResult result = {
+      kernel.name(), elapsed_time, elapsed_time_queue_submit, elapsed_time_start_end,
+      elapsed_time_queue_start, local_threads, false, {}
+    };
     return result;
   }
 
@@ -372,7 +381,10 @@ TunerImpl::TunerResult TunerImpl::RunKernel(const std::string &source, const Ker
   catch(std::exception& e) {
     fprintf(stdout, "%s Kernel %s failed\n", kMessageFailure.c_str(), kernel.name().c_str());
     fprintf(stdout, "%s   catched exception: %s\n", kMessageFailure.c_str(), e.what());
-    TunerResult result = {kernel.name(), std::numeric_limits<float>::max(), 0, false, {}};
+    TunerResult result = {
+      kernel.name(), std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),
+      std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 0, false, {}
+    };
     return result;
   }
 }

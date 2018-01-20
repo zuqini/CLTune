@@ -17,13 +17,13 @@
 // =================================================================================================
 //
 // Copyright 2015 SURFsara
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //  http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -104,6 +104,28 @@ class Event {
     auto time_end = cl_ulong{0};
     clGetEventProfilingInfo(*event_, CL_PROFILING_COMMAND_END, bytes, &time_end, nullptr);
     return static_cast<float>(time_end - time_start) * 1.0e-6f;
+  }
+
+  float GetElapsedTime(const cl_profiling_info start_state, const cl_profiling_info end_state) const {
+    WaitForCompletion();
+    const auto bytes = sizeof(cl_ulong);
+    auto time_start = cl_ulong{0};
+    clGetEventProfilingInfo(*event_, start_state, bytes, &time_start, nullptr);
+    auto time_end = cl_ulong{0};
+    clGetEventProfilingInfo(*event_, end_state, bytes, &time_end, nullptr);
+    return static_cast<float>(time_end - time_start) * 1.0e-6f;
+  }
+
+  float GetQueueToSubmitTime() const {
+    return GetElapsedTime(CL_PROFILING_COMMAND_QUEUED, CL_PROFILING_COMMAND_SUBMIT);
+  }
+
+  float GetQueueToStartTime() const {
+    return GetElapsedTime(CL_PROFILING_COMMAND_QUEUED, CL_PROFILING_COMMAND_START);
+  }
+
+  float GetStartToEndTime() const {
+    return GetElapsedTime(CL_PROFILING_COMMAND_START, CL_PROFILING_COMMAND_END);
   }
 
   // Accessor to the private data-member
