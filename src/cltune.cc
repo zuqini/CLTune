@@ -10,13 +10,13 @@
 // -------------------------------------------------------------------------------------------------
 //
 // Copyright 2014 SURFsara
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //  http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -229,6 +229,13 @@ template <> void PUBLIC_API Tuner::AddArgumentScalar<float2>(const float2 argume
 }
 template <> void PUBLIC_API Tuner::AddArgumentScalar<double2>(const double2 argument) {
   pimpl->arguments_double2_.push_back({pimpl->argument_counter_++, argument});
+}
+
+// =================================================================================================
+
+void PUBLIC_API Tuner::LMAOWHYTHO(std::vector<int> &host_vec) {
+  Buffer<int>(pimpl->arguments_output_copy_[0].buffer).Read(
+    pimpl->queue_, pimpl->arguments_output_copy_[0].size, host_vec);
 }
 
 // =================================================================================================
