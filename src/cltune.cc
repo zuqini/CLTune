@@ -233,7 +233,7 @@ template <> void PUBLIC_API Tuner::AddArgumentScalar<double2>(const double2 argu
 
 // =================================================================================================
 
-void PUBLIC_API Tuner::LMAOWHYTHO(std::vector<int> &host_vec) {
+void PUBLIC_API Tuner::GetOutput(std::vector<int> &host_vec) {
   Buffer<int>(pimpl->arguments_output_copy_[0].buffer).Read(
     pimpl->queue_, pimpl->arguments_output_copy_[0].size, host_vec);
 }

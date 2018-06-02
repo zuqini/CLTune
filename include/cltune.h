@@ -165,7 +165,7 @@ class Tuner {
 
   double PUBLIC_API BestTime() const;
 
-  void PUBLIC_API LMAOWHYTHO(std::vector<int> &host_vec);
+  void PUBLIC_API GetOutput(std::vector<int> &host_vec);
 
  private:
 
